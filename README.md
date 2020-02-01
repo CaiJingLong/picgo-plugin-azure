@@ -2,6 +2,8 @@
 
 Upload image to [azure git](http://dev.azure.com/) of [picgo](https://molunerfinn.com/PicGo/) and [picgo-core](https://picgo.github.io/PicGo-Core-Doc/).
 
+[![npm](https://img.shields.io/npm/v/picgo-plugin-azure?style=flat-square)](https://www.npmjs.com/package/picgo-plugin-azure) [![GitHub package.json version](https://img.shields.io/github/package-json/v/caijinglong/picgo-plugin-azure?style=flat-square&label=github%20version)](https://github.com/CaiJingLong/picgo-plugin-azure) [![GitHub stars](https://img.shields.io/github/stars/caijinglong/picgo-plugin-azure?style=social)](https://github.com/CaiJingLong/picgo-plugin-azure)
+
 ## about params
 
 | name     | description       |
