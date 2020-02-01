@@ -1,16 +1,16 @@
 import base64 from 'base64-js'
-import { readFile, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import { Base64 } from 'js-base64'
 import picgo from 'picgo'
 
 export default class Uploader {
-  async handle (ctx: picgo) {
+  async handle(ctx: picgo) {
     for (let i in ctx.input) {
-      let img = this.upload(ctx, ctx.input[i])
-      await img.then(imgUrl => {
-        ctx.log.info(imgUrl)
-        ctx.output[i].url = imgUrl
-      })
+      let img = await this.upload(ctx, ctx.input[i])
+      ctx.log.info(`output url = ${img.url}`)
+      ctx.output[i].imgUrl = img.url
+      ctx.output[i].base64Image = img.imgStr
+      ctx.output[i].fileName = img.name
     }
   }
 
@@ -36,14 +36,16 @@ export default class Uploader {
 
     let name = `${time}${extName}`
 
-    let uri = `https://dev.azure.com/${org}/${project}/_apis/git/repositories/${
-        repo}/pushes?api-version=5.0`
+    let uri = `https://dev.azure.com/${org}/${project}/_apis/git/repositories/${repo}/pushes?api-version=5.0`
 
     let listResp = await ctx.Request.request({ method: 'get', uri: uri })
 
     let commitUrl = JSON.parse(listResp).value[0].url
 
-    let commitResp = await ctx.Request.request({ method: 'get', uri: commitUrl })
+    let commitResp = await ctx.Request.request({
+      method: 'get',
+      uri: commitUrl
+    })
 
     let lastCommitId = JSON.parse(commitResp).commits[0].commitId
 
@@ -55,14 +57,18 @@ export default class Uploader {
 
     let body = {
       refUpdates: [{ name: 'refs/heads/master', oldObjectId: lastCommitId }],
-      commits: [{
-        comment: 'Upload by picgo-plugin-azure',
-        changes: [{
-          changeType: 'add',
-          item: { path: name },
-          newContent: { content: imgStr, contentType: 'base64Encoded' }
-        }]
-      }]
+      commits: [
+        {
+          comment: 'Upload by picgo-plugin-azure',
+          changes: [
+            {
+              changeType: 'add',
+              item: { path: name },
+              newContent: { content: imgStr, contentType: 'base64Encoded' }
+            }
+          ]
+        }
+      ]
     }
 
     let response = await ctx.Request.request({
@@ -73,7 +79,12 @@ export default class Uploader {
     })
 
     let repoUrl = JSON.parse(response).repository.url
-    return `${repoUrl}/items?path=%2F${
-        name}&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&resolveLfs=true&%24format=octetStream&api-version=5.0`
+    let imgUrl = `${repoUrl}/items?path=%2F${name}&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&resolveLfs=true&%24format=octetStream&api-version=5.0`
+
+    return {
+      url: imgUrl,
+      imgStr: imgStr,
+      name: name
+    }
   }
 }
