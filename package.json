@@ -11,14 +11,15 @@
     "singleQuote": true,
     "semi": false
   },
-  "homepage": "",
+  "homepage": "https://github.com/CaiJingLong/picgo-plugin-azure",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p .",
     "dev": "tsc -w -p .",
     "patch": "npm version patch && git push origin master && git push origin --tags",
     "minor": "npm version minor && git push origin master && git push origin --tags",
-    "major": "npm version major && git push origin master && git push origin --tags"
+    "major": "npm version major && git push origin master && git push origin --tags",
+    "release": "tsc && npm publish"
   },
   "keywords": [
     "picgo",
