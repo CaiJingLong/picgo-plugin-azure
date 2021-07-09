@@ -5,8 +5,16 @@ import picgo from 'picgo'
 
 export default class Uploader {
   async handle(ctx: picgo) {
+    let transformer = ctx.getConfig('picBed.transformer')
     for (let i in ctx.input) {
-      let img = await this.upload(ctx, ctx.input[i])
+      let img: any
+      if (transformer == 'base64'){
+        //use buffer
+        img = await this.upload(ctx, null, ctx.input[i].buffer)
+      }else{
+        //use filePath
+        img = await this.upload(ctx, ctx.input[i], null)
+      }
       ctx.log.info(`output url = ${img.url}`)
       ctx.output[i].imgUrl = img.url
       ctx.output[i].base64Image = img.imgStr
@@ -14,10 +22,14 @@ export default class Uploader {
     }
   }
 
-  upload = async (ctx: picgo, filePath: string) => {
-    let f = readFileSync(filePath)
-
-    let imgStr = base64.fromByteArray(f)
+  upload = async (ctx: picgo, filePath: string, buffer: Buffer) => {
+    let imgStr: string
+    if (buffer !== null){
+      imgStr = buffer.toString('base64')
+    }else{
+      let f = readFileSync(filePath)
+      imgStr = base64.fromByteArray(f)
+    }
     const config = ctx.getConfig('picBed.azure')
 
     let org = config.username
